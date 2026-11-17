@@ -191,19 +191,21 @@ var Parent = (function () {
   }
 
 
-  /* K5 readiness: one row per skill group, from the five Helper's Yard checks */
+  /* K5 readiness: one row per concept. Helper's Yard teaches one concept per lesson; 80% or more on a lesson's practice shows it is ready. */
   function readinessReport(p) {
-    var isl = CONTENT.islands.H0, st = Store.islandState(p, 'H0'), r = st.readiness || {};
+    var isl = CONTENT.islands.H0, st = Store.islandState(p, 'H0'), r = st.readiness || {}, ready = 0, started = 0;
     var rows = isl.quests.filter(function (q) { return q.kind === 'teach'; }).map(function (q) {
-      var x = r[q.id], qs = Store.questState(p, 'H0', q.id), pct = x && x.total ? Math.round(x.right / x.total * 100) : null;
-      if (x && x.skipped) return '<tr><td>' + U.esc(q.title) + '</td><td>not asked (the check stopped early)</td><td>' + (qs.done ? '<b style="color:#2f7d9e">Taught, now passed ✓</b>' : '<b style="color:#c98a12">Needs the lesson</b>') + '</td><td>' + (qs.done && !qs.pretested ? qs.best + '%' : '—') + '</td></tr>';
-      var status = !x ? '—' : pct >= 80 ? '<b style="color:#2f9e55">Ready ✓</b>' : qs.done ? '<b style="color:#2f7d9e">Taught, now passed ✓</b>' : '<b style="color:#c98a12">Needs the lesson</b>';
-      return '<tr><td>' + U.esc(q.title) + '</td><td>' + (x ? x.right + ' of ' + x.total + ' (' + pct + '%)' : 'not checked yet') + '</td><td>' + status + '</td><td>' + (qs.done && !qs.pretested ? (qs.best + '%') : '—') + '</td></tr>';
+      var x = r[q.id], qs = Store.questState(p, 'H0', q.id);
+      var first = qs.first !== undefined ? qs.first : (x && x.total ? Math.round(x.right / x.total * 100) : null);
+      var best = qs.attempts ? qs.best : (x && x.total ? Math.round(x.right / x.total * 100) : null);
+      if (first !== null || best !== null) started++;
+      var ok = best !== null && best >= 80; if (ok) ready++;
+      var status = best === null ? '—' : ok ? '<b style="color:#2f9e55">Ready ✓</b>' : '<b style="color:#c98a12">Keep practicing</b>';
+      return '<tr><td>' + U.esc(q.title) + '</td><td>' + (first === null ? 'not started' : first + '%') + '</td><td>' + (best === null ? '—' : best + '%') + '</td><td>' + status + '</td></tr>';
     }).join('');
-    var checked = Object.keys(r).length, ready = Object.keys(r).filter(function (k) { return r[k].total && r[k].right / r[k].total >= 0.8 - 1e-9; }).length;
-    return '<h3>K5 readiness report</h3><p class="muted">Five short checks in Helper\'s Yard, each after a short how-to video. 80% or more on a skill shows it is ready; anything lower opens a short teaching lesson first. A check stops early after 4 misses, so a struggling child is never pushed through it. ' +
-      (checked ? ready + ' of ' + checked + ' skill groups were ready on the first check.' : 'No checks taken yet.') + '</p>' +
-      '<table class="grid"><tr><th>Skill group</th><th>First check</th><th>Status</th><th>Lesson score</th></tr>' + rows + '</table>';
+    return '<h3>K5 readiness report</h3><p class="muted">Helper\'s Yard teaches one K5 concept per lesson: a short how-to video, a few teaching pages, a hands-on activity, then a short practice. 80% or more on the practice shows the concept is ready. ' +
+      (started ? ready + ' of ' + started + ' concepts started are ready.' : 'No lessons taken yet.') + '</p>' +
+      '<table class="grid"><tr><th>Concept</th><th>First try</th><th>Best</th><th>Status</th></tr>' + rows + '</table>';
   }
 
   /* ---------------- Hours & records: course time by week, month, quarter, school year ---------------- */

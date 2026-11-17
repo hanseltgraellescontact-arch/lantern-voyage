@@ -17,7 +17,7 @@
   function done(prob, tip, tip2) { prob.walk = walk(prob, tip, tip2); return prob; }
   var PLANE1 = ['triangle', 'rectangle', 'square', 'circle'], PLANE2 = PLANE1.concat(['pentagon', 'hexagon', 'oval']);
   var SIDES = { triangle: 3, square: 4, rectangle: 4, pentagon: 5, hexagon: 6, rhombus: 4, trapezoid: 4, circle: 0, oval: 0 };
-  var SOLIDS = { cube: 'cube', prism: 'rectangular prism', pyramid: 'pyramid', sphere: 'sphere', cylinder: 'cylinder', cone: 'cone' };
+  var SOLIDS = { cube: 'cube', prism: 'rectangular prism', pyramid: 'square pyramid', sphere: 'sphere', cylinder: 'cylinder', cone: 'cone' };
   var FEV = { cube: [6, 12, 8], prism: [6, 12, 8], pyramid: [5, 8, 5] };
 
   var G = {};
@@ -123,7 +123,7 @@
   var SHORT = { cube: 'It has 6 square faces, all the same.', prism: 'It is shaped just like a box.', pyramid: 'Its triangle faces meet at a point.', sphere: 'It is round all over, like a ball.', cylinder: 'It has 2 circle faces, like a can.', cone: 'It has 1 circle face and a point.' };
   G.solidName = function (level) {
     var pool = level === 1 ? ['cube', 'sphere', 'cylinder', 'cone'] : Object.keys(SOLIDS), k = P(pool), opts = U.shuffle([k].concat(U.shuffle(pool.filter(function (x) { return x !== k; })).slice(0, 2)));
-    var tip = { cube: 'A cube has 6 square faces.', prism: 'A rectangular prism is shaped like a box.', pyramid: 'A pyramid has a flat bottom and triangles that meet at a point.', sphere: 'A sphere is round like a ball.', cylinder: 'A cylinder is like a can: 2 circle faces and a curve.', cone: 'A cone has 1 circle face and a point, like an ice-cream cone.' };
+    var tip = { cube: 'A cube has 6 square faces.', prism: 'A rectangular prism is shaped like a box.', pyramid: 'A square pyramid has a square bottom and 4 triangles that meet at a point.', sphere: 'A sphere is round like a ball.', cylinder: 'A cylinder is like a can: 2 circle faces and a curve.', cone: 'A cone has 1 circle face and a point, like an ice-cream cone.' };
     return done({ skill: 'solidName', type: 'choice', big: true, data: { k: k }, prompt: 'Tap the ' + SOLIDS[k].toUpperCase() + '.', say: 'Tap the ' + SOLIDS[k] + '.', visual: '',
       choices: opts.map(function (x, i) { return pic(Models.figure(x, 100, COLS[i]), x, x === k ? null : 'solid-name', SOLIDS[x]); }), answer: k,
       hints: [tip[k], 'Think of things around the house with this shape.', 'Find the ' + SOLIDS[k] + '.'], explain: tip[k], why: [SHORT[k], 'It is the biggest shape in the row.', 'It is the brightest shape in the row.'] }, tip[k], 'Look at each shape and find the match.');

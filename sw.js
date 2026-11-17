@@ -1,7 +1,7 @@
 /* Offline support when the game is hosted on a website (it is not used when opening index.html from a folder).
    Everything the game loads is kept in the device's cache, so it keeps working without internet.
    Bump VERSION whenever the game files change, so devices pick up the new version. */
-var VERSION = 'lv-9';
+var VERSION = 'lv-10';
 var CORE = ['./', 'index.html', 'css/style.css', 'manifest.json'];
 self.addEventListener('install', function (e) { e.waitUntil(caches.open(VERSION).then(function (c) { return c.addAll(CORE); }).then(function () { return self.skipWaiting(); })); });
 self.addEventListener('activate', function (e) {

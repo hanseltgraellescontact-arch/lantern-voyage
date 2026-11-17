@@ -245,7 +245,7 @@ var Quest = (function () {
     var KEYID = prob.key || prob.skill, KEY = App.isHarbor() && window.G1 && G1.KEYS[KEYID];
     function head() {
       return (mode.header || '') + '<div class="prompt"><button class="iconbtn say" id="say" aria-label="Hear it">🔊</button><div>' + String(prob.prompt).replace(/\b(LESS|MORE|NOT|FEWER|EVERY)\b/g, '<b class="emph">$1</b>') + '</div></div>' +
-        (KEY ? '<div class="conceptkey"><button class="iconbtn" data-key="1" aria-label="Hear the key">🔊</button><div class="keybody"><b>🔑 Key</b>' + KEY.html() + '</div></div>' : '') +
+        (KEY ? '<div class="conceptkey"><button class="iconbtn" data-key="1" aria-label="Hear the key">🔊</button><div class="keybody"><b>🔑 Key</b>' + KEY.html(prob) + '</div></div>' : '') +
         '<div class="visual">' + (prob.visual || '') + '</div>';
     }
     function helpRow(extra) {
@@ -264,7 +264,7 @@ var Quest = (function () {
       if (h) h.onclick = function () {
         firstTry = false;
         var t = prob.hints[Math.min(hintN++, prob.hints.length - 1)];
-        U.$('#hintArea', board).innerHTML = '<div class="hintbox">💡 ' + t + '</div>'; Audio2.speak(t.replace(/<[^>]+>/g, ''));
+        U.$('#hintArea', board).innerHTML = '<div class="hintbox">💡 ' + t + (prob.hintPic ? '<div class="hintpic">' + prob.hintPic + '</div>' : '') + '</div>'; Audio2.speak(t.replace(/<[^>]+>/g, ''));
       };
       U.$('#say', board).onclick = function () { Audio2.speak(prob.say); };
       var kb = U.$('[data-key]', board); if (kb) kb.onclick = function () { Audio2.speak(KEY.say); };
@@ -313,7 +313,7 @@ var Quest = (function () {
     /* Part 2: the problem itself */
     function mainPart(lead) {
       var html = head() + (lead ? '<div class="leadline">' + lead + '</div>' : '');
-      if (prob.type === 'choice') html += '<div class="choices">' + prob.choices.map(function (c, i) { return '<button class="choicebtn" data-c="' + i + '"' + (prob.big ? ' style="padding:6px"' : '') + '>' + c.html + '</button>'; }).join('') + '</div>';
+      if (prob.type === 'choice') html += '<div class="choices' + (prob.stack ? ' stack' : '') + (prob.ordinalRow ? ' ordrow' : '') + '">' + prob.choices.map(function (c, i) { return '<button class="choicebtn" data-c="' + i + '"' + (prob.big ? ' style="padding:6px 14px"' : '') + '>' + c.html + '</button>'; }).join('') + '</div>';
       else if (prob.type === 'number') html += '<div class="center"><span class="answerbox" id="ab">&nbsp;</span>' + numpadHtml() + '</div>';
       else if (prob.type === 'multi') html += '<div class="choices">' + prob.choices.map(function (c, i) { return '<button class="choicebtn multi" data-m="' + i + '" style="padding:6px">' + c.html + '</button>'; }).join('') + '</div>' +
         '<div class="center"><button class="btn green" id="check">Check</button></div>';
@@ -716,7 +716,7 @@ var Quest = (function () {
       var item = list[k], who = Q.q.kind === 'lesson' || Q.q.kind === 'teach' ? keeper() : parrot();
       var prob = gen(item.key, check ? 2 : Q.level);
       if (item.pip) pipify(prob);
-      var talk = Q.q.kind === 'boss' ? 'No hints in the ' + W().boss + '. You can do it!' : check ? 'Just do your best. It\'s okay to not know some!' :
+      var talk = Q.q.kind === 'boss' ? (App.isHarbor() ? W().boss + '! Your first try is the one that counts. You can do it!' : 'No hints in the ' + W().boss + '. You can do it!') : check ? 'Just do your best. It\'s okay to not know some!' :
         item.pip ? 'Spot ' + App.parrotName() + '\'s mistake!' : item.review ? 'Quick review!' : 'Problem ' + (k + 1) + ' of ' + list.length;
       var b = frame(who, talk, '');
       var helpOK = false; // help is for the lesson and practice; scored work must be independent
@@ -898,7 +898,7 @@ var Quest = (function () {
       else { pass = true; stars = score >= 90 ? 3 : score >= 60 ? 2 : 1; }
     }
     var prevBest = qs.stars, shells = 0, tokenMsg = '', early = Q.early;
-    if (!(early && !pass)) { qs.attempts++; qs.last = U.today(); qs.lastScore = score; qs.best = Math.max(qs.best, score); }
+    if (!(early && !pass)) { if (qs.first === undefined) qs.first = score; qs.attempts++; qs.last = U.today(); qs.lastScore = score; qs.best = Math.max(qs.best, score); }
     if (pass) {
       shells = Math.max(0, stars - prevBest) * 10 + 5;
       qs.stars = Math.max(qs.stars, stars);

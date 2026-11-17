@@ -61,13 +61,28 @@ var Store = (function () {
       Object.keys(b).forEach(function (k) { if (p[k] === undefined) p[k] = b[k]; });
     });
     if (data.lastBackup === undefined) data.lastBackup = null;
+    stamp = data.savedAt || 0;
     save();
     return data;
   }
+  /* Several copies of the game can be open at once (two tabs, or a tab left open from yesterday). Each save is stamped,
+     so an old copy can never write its out-of-date data (like a default parrot) over newer progress. */
+  var stamp = 0;
+  function storedStamp() { try { var r = localStorage.getItem(KEY); return r ? (JSON.parse(r).savedAt || 0) : 0; } catch (e) { return 0; } }
+  function adopt() { try { var r = localStorage.getItem(KEY); if (r) { data = JSON.parse(r); stamp = data.savedAt || 0; } } catch (e) {} }
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(data)); return true; }
+    // another copy saved since this one last read: take its data first, so this copy's old values don't erase it
+    if (stamp && storedStamp() > stamp) { var keepId = data.activeId; adopt(); if (keepId && data.profiles.some(function (x) { return x.id === keepId; })) data.activeId = keepId; return false; }
+    data.savedAt = Date.now();
+    try { localStorage.setItem(KEY, JSON.stringify(data)); stamp = data.savedAt; return true; }
     catch (e) { U.toast('Could not save progress on this computer.'); return false; }
   }
+  window.addEventListener('storage', function (e) {
+    if (e.key !== KEY || !e.newValue) return;
+    try { var keepId = data && data.activeId; data = JSON.parse(e.newValue); stamp = data.savedAt || 0; if (keepId && data.profiles.some(function (x) { return x.id === keepId; })) data.activeId = keepId; } catch (er) {}
+    if (window.App && App.screen && App.screen() !== 'title' && document.visibilityState !== 'visible') { window.__staleGoTitle = true; }
+  });
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && window.__staleGoTitle) { window.__staleGoTitle = false; if (window.App) App.go('title'); } });
   function get() { return data; }
   /* A few settings have their own values for the 1st-grade harbor course (shorter days). */
   function setting(p, key) {

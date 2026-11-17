@@ -32,13 +32,13 @@ var G1 = (function () {
       answer: String(n), key: r[1] > 10 ? 'teenWords' : undefined, hints: ['Tap the 🔊 to hear each word.', 'The number ' + n + ' is spelled ' + W[n].split('').join('-') + '.'], explain: n + ' is the word ' + W[n] + '.' }; };
   S.dots = function (o, l) { var r = rng(o, l, 0, 10), n = R(Math.max(r[0], 1), r[1]);
     return { tapCount: true, readOut: true, skill: 'dots', type: 'choice', data: { n: n }, prompt: 'How many dots?', say: n > 10 ? 'How many dots? The top ten-frame is full. That is ten. Then count on.' : 'How many dots?', visual: Models.dots(n), choices: numChoices(n, 0, Math.max(r[1], 5)), answer: String(n), key: n > 10 ? 'teens' : undefined,
-      hints: [n > 10 ? 'The full ten-frame is ten. Count on: eleven, twelve…' : 'Count each dot one time.', 'There are ' + n + ' dots.'], explain: 'There are ' + W[n] + ' dots.', walk: countWalk(n, 'dots', Models.dots(n)) }; };
+      hints: [n > 10 ? 'The full ten-frame is ten. Count on: eleven, twelve…' : 'Count each dot one time.', (n === 1 ? 'There is 1 dot.' : 'There are ' + n + ' dots.')], explain: n === 1 ? 'There is one dot.' : 'There are ' + W[n] + ' dots.', walk: countWalk(n, 'dots', Models.dots(n)) }; };
   S.tally = function (o, l) { var r = rng(o, l, 1, 5), n = R(Math.max(1, r[0]), r[1]);
     return { tapCount: true, readOut: true, skill: 'tally', type: 'choice', data: { n: n }, prompt: 'How many tally marks?', say: 'How many tally marks?', visual: Models.tally(n), choices: numChoices(n, 1, Math.max(r[1], 5)), answer: String(n),
       hints: ['Count each line.', n >= 5 ? 'A slash across 4 lines makes a group of 5.' : 'Count: one, two, three…'], explain: 'There are ' + W[n] + ' tally marks.', walk: countWalk(n, 'marks', Models.tally(n)) }; };
   S.countSet = function (o, l) { var r = rng(o, l, 1, 10), n = R(Math.max(1, r[0]), r[1]), t = P(THINGS), v = Models.row(n, t[0], t[2]);
     return { tapCount: true, readOut: true, skill: 'countSet', type: 'choice', data: { n: n, t: t }, prompt: 'How many ' + t[1] + '?', say: 'How many ' + t[1] + '?', visual: v, choices: numChoices(n, 0, Math.max(r[1], 5)), answer: String(n),
-      hints: ['Touch each one and count.', 'There are ' + n + '.'], explain: 'There are ' + W[n] + ' ' + (n === 1 ? t[0] : t[1]) + '.', walk: countWalk(n, t[1], v) }; };
+      hints: ['Touch each one and count.', (n === 1 ? 'There is 1.' : 'There are ' + n + '.')], explain: (n === 1 ? 'There is ' : 'There are ') + W[n] + ' ' + (n === 1 ? t[0] : t[1]) + '.', walk: countWalk(n, t[1], v) }; };
   S.makeSet = function (o, l) { var r = rng(o, l, 1, 10), k = R(Math.max(1, r[0]), r[1]), n = Math.min(12, k + R(1, 3)), t = P(THINGS.slice(0, 3));
     return { skill: 'makeSet', type: 'shadeSet', n: n, answer: k, item: [t[0], t[2], '#d9d4c6', t[1], 'colored'], data: { n: n, k: k },
       prompt: 'Tap ' + W[k] + ' ' + (k === 1 ? t[0] : t[1]) + ' to color ' + (k === 1 ? 'it' : 'them') + '.', say: 'Tap ' + W[k] + ' ' + (k === 1 ? t[0] : t[1]) + '. Then press check.',
@@ -47,12 +47,12 @@ var G1 = (function () {
       walk: [{ say: 'Tap one and say one. Tap the next one and say two. Keep going. When you say ' + W[k] + ', stop and press Check.', show: Models.row(k, t[0], t[2], 0, 300), back: true }] }; };
   S.compareSets = function (o, l) { var hi = o.max || 9, a = R(1, hi), b = R(1, hi); while (b === a) b = R(1, hi);
     var t = P(THINGS), more = Math.random() < 0.6, want = more ? (a > b ? 'a' : 'b') : (a < b ? 'a' : 'b');
-    var opt = function (n, v) { return { html: Models.row(n, t[0], t[2], 0, 220), value: v, err: v === want ? null : 'compare-sets', say: W[n] + ' ' + t[1] }; };
-    return { skill: 'compareSets', type: 'choice', big: true, data: { a: a, b: b, more: more }, prompt: 'Which group has ' + (more ? 'MORE' : 'FEWER') + ' ' + t[1] + '?', say: 'Which group has ' + (more ? 'more' : 'fewer') + ' ' + t[1] + '?',
+    var opt = function (n, v) { return { html: Models.row(n, t[0], t[2], 0, 640, true), value: v, err: v === want ? null : 'compare-sets', say: W[n] + ' ' + t[1] }; };
+    return { skill: 'compareSets', type: 'choice', big: true, stack: true, data: { a: a, b: b, more: more }, prompt: 'Which group has ' + (more ? 'MORE' : 'FEWER') + ' ' + t[1] + '?', say: 'Which group has ' + (more ? 'more' : 'fewer') + ' ' + t[1] + '?',
       visual: '', choices: [opt(a, 'a'), opt(b, 'b')], answer: want, hints: ['Count each group.', 'One group has ' + a + ', the other has ' + b + '.'],
       explain: W[Math.max(a, b)] + ' is more than ' + W[Math.min(a, b)] + '.', walk: [
-        { say: 'Count the first group. How many?', show: Models.row(a, t[0], t[2], 0, 300), ask: { type: 'number', answer: a } },
-        { say: 'Count the second group. How many?', show: Models.row(b, t[0], t[2], 0, 300), ask: { type: 'number', answer: b } },
+        { say: 'Count the first group. How many?', show: Models.row(a, t[0], t[2], 0, 400), ask: { type: 'number', answer: a } },
+        { say: 'Count the second group. How many?', show: Models.row(b, t[0], t[2], 0, 400), ask: { type: 'number', answer: b } },
         { say: 'Which group has ' + (more ? 'more' : 'fewer') + '?', show: '', ask: { type: 'choice', options: [opt(a, 'a'), opt(b, 'b')], answer: want }, final: true }] }; };
   S.nextNumber = function (o, l) { var lo = o.min || 0, hi = o.max || 10, after = !o.before && (o.after || Math.random() < 0.6), n = after ? R(lo, hi - 1) : R(lo + 1, hi), ans = after ? n + 1 : n - 1;
     return { readOut: true, skill: 'nextNumber', type: 'choice', data: { n: n, after: after }, prompt: 'What number comes ' + (after ? 'AFTER' : 'BEFORE') + ' ' + n + '?', say: 'What number comes ' + (after ? 'after' : 'before') + ' ' + W[n] + '?',
@@ -63,9 +63,10 @@ var G1 = (function () {
     var shown = seq.map(function (x, i) { return i === miss ? '<span class="g1blank">?</span>' : x; }).join(', ');
     return { readOut: true, skill: 'missingNumber', type: 'choice', data: { seq: seq, ans: ans }, prompt: 'What number is missing? ' + big(shown), say: 'What number is missing?' + (back ? ' We are counting backward.' : ''),
       visual: '', choices: numChoices(ans, lo, hi), answer: String(ans), hints: [back ? 'These numbers count backward.' : 'Count up by one.', 'Say the numbers out loud.'], explain: 'The missing number is ' + ans + '.' }; };
+  function duckL(size, col) { return '<span style="display:inline-block;transform:scaleX(-1)">' + Art.icon('duck', size, col) + '</span>'; }
   S.ordinal = function (o, l) { var n = o.max || 5, k = R(1, n), cols = ['#ffd23f', '#3b8fd9', '#e5533d', '#36b37e', '#b48ef0', '#ff9f1c', '#ff6fa8', '#1fb5ad', '#8d5730', '#ffffff'];
-    return { skill: 'ordinal', type: 'choice', big: true, data: { k: k, n: n }, prompt: 'The ducks are in line, going this way ➜. Tap the ' + ORD[k - 1].toUpperCase() + ' duck.', say: 'The ducks are in a line. Tap the ' + ORD[k - 1] + ' duck.',
-      visual: '', ordinalRow: true, choices: Array.from({ length: n }, function (_, i) { return { html: Art.icon('duck', 54, cols[i]), value: String(i + 1), err: i + 1 === k ? null : 'ordinal', say: ORD[i] }; }),
+    return { skill: 'ordinal', type: 'choice', big: true, data: { k: k, n: n }, prompt: 'The ducks walk this way ⬅. The front is by the flag 🚩. Tap the ' + ORD[k - 1].toUpperCase() + ' duck.', say: 'The ducks are walking in a line. The front of the line is by the flag. Tap the ' + ORD[k - 1] + ' duck.',
+      visual: '<div class="g1front">🚩 front</div>', ordinalRow: true, choices: Array.from({ length: n }, function (_, i) { return { html: duckL(n > 5 ? 40 : 54, cols[i]), value: String(i + 1), err: i + 1 === k ? null : 'ordinal', say: ORD[i] }; }),
       answer: String(k), key: n > 5 ? 'ordinal10' : undefined, hints: ['Start at the front of the line.', 'Count: first, second, third…'], explain: 'Counting from the front, the ' + ORD[k - 1] + ' duck is number ' + k + '.' }; };
   S.evenOdd = function (o, l) { var n = R(o.min || 1, o.max || 10), even = n % 2 === 0;
     var pairs = '<div class="g1pairs">' + Array.from({ length: Math.ceil(n / 2) }, function (_, i) { return '<span>' + Art.icon('fish', 40, '#3b8fd9') + (i * 2 + 1 < n ? Art.icon('fish', 40, '#3b8fd9') : '<i class="g1alone"></i>') + '</span>'; }).join('') + '</div>';
@@ -108,10 +109,10 @@ var G1 = (function () {
       hints: ['Three of them are alike in some way.', g === groups[0] ? 'Three are animals.' : 'Three are foods.'], explain: 'The ' + odd + ' is not like the others.' }; };
   /* ---------- adding and taking away within 10 ---------- */
   S.add10 = function (o, l) { var hi = o.max || 10, a = R(1, hi - 1), b = R(1, hi - a), t = P(THINGS), n = a + b;
-    var v = '<div class="g1row">' + Models.row(a, t[0], t[2], 0, 220) + '<span class="g1op">+</span>' + Models.row(b, t[0], t[2], 0, 220) + '</div>';
+    var v = '<div class="g1row">' + Models.row(a, t[0], t[2], 0, 400) + '<span class="g1op">+</span>' + Models.row(b, t[0], t[2], 0, 400) + '</div>';
     return { tapCount: true, readOut: true, skill: 'add10', type: 'choice', data: { a: a, b: b }, prompt: a + ' ' + (a === 1 ? t[0] : t[1]) + ' and ' + b + ' more. How many in all? ' + big(a + ' + ' + b + ' = ?'), say: W[a] + ' and ' + W[b] + ' more. How many in all?', visual: v,
       choices: numChoices(n, 0, hi + 2), answer: String(n), hints: ['Put the two groups together.', 'Count them all, or count on from ' + Math.max(a, b) + '.'], explain: a + ' + ' + b + ' = ' + n + '.', walk: [
-        { say: 'How many are in the first group?', show: Models.row(a, t[0], t[2], 0, 300), ask: { type: 'number', answer: a } },
+        { say: 'How many are in the first group?', show: Models.row(a, t[0], t[2], 0, 400), ask: { type: 'number', answer: a } },
         { say: 'Now count on with the second group: ' + W[a] + '… How many in all?', show: v, ask: { type: 'number', answer: n }, final: true }] }; };
   S.sub10 = function (o, l) { var hi = o.max || 10, a = R(2, hi), b = R(1, a - 1), t = P(THINGS), n = a - b;
     var v = Models.row(a, t[0], t[2], b);
@@ -142,7 +143,7 @@ var G1 = (function () {
       hints: ['Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday.'], explain: ans + ' comes ' + (after ? 'after ' : 'before ') + DAYS[i] + '.' }; };
   S.longer = function (o, l) { var a = R(2, 8), b = R(2, 8); while (b === a) b = R(2, 8); var longer = Math.random() < 0.6, want = longer ? (a > b ? 'a' : 'b') : (a < b ? 'a' : 'b');
     var cols = ['#e5533d', '#3b8fd9'];
-    return { skill: 'longer', type: 'choice', big: true, data: { a: a, b: b, longer: longer }, prompt: 'Which rope is ' + (longer ? 'LONGER' : 'SHORTER') + '?', say: 'Which rope is ' + (longer ? 'longer' : 'shorter') + '?', visual: '',
+    return { skill: 'longer', type: 'choice', big: true, stack: true, data: { a: a, b: b, longer: longer }, prompt: 'Which rope is ' + (longer ? 'LONGER' : 'SHORTER') + '?', say: 'Which rope is ' + (longer ? 'longer' : 'shorter') + '?', visual: '',
       choices: [{ html: Models.lengthBar(a, cols[0], 8), value: 'a', err: want === 'a' ? null : 'length', say: 'the red rope' }, { html: Models.lengthBar(b, cols[1], 8), value: 'b', err: want === 'b' ? null : 'length', say: 'the blue rope' }],
       answer: want, hints: ['Line up the ends.', 'See which one sticks out farther.'], explain: (want === 'a' ? 'The red' : 'The blue') + ' rope is ' + (longer ? 'longer' : 'shorter') + '.' }; };
   S.equalShares = function (o, l) { var n = P([2, 4]), name = n === 2 ? 'halves' : 'fourths', k = P(['circle', 'rect']);
@@ -159,7 +160,7 @@ var G1 = (function () {
 
   /* ---------- numbers to 20 (Math 1, chapter 2) ---------- */
   S.dozen = function (o, l) {
-    var isQ = Math.random() < 0.5 || l === 1, n = isQ ? 12 : P([10, 11, 12, 12, 13, 14]), v = '<div class="g1carton">' + Models.row(n, 'egg', '#fff6e0', 0, 420) + '</div>';
+    var isQ = Math.random() < 0.5 || l === 1, n = isQ ? 12 : P([10, 11, 12, 12, 13, 14]), v = Models.carton(n);
     if (isQ) return { tapCount: true, readOut: true, skill: 'dozen', type: 'choice', data: { n: 12 }, prompt: 'A DOZEN eggs. How many eggs are in a dozen?', say: 'Here is a dozen eggs. How many eggs are in a dozen? Tap each egg to count.', visual: v,
       choices: numChoices(12, 6, 14), answer: '12', hints: ['Touch each egg and count.', 'A dozen is twelve.'], explain: 'A dozen is twelve. There are twelve eggs.', walk: countWalk(12, 'eggs', v) };
     return { tapCount: true, readOut: true, skill: 'dozen', type: 'choice', data: { n: n }, prompt: 'Is this a DOZEN eggs?', say: 'Is this a dozen eggs? A dozen is twelve. Tap each egg to count.', visual: v,
@@ -275,7 +276,7 @@ var G1 = (function () {
     g1count: { title: 'Counting', steps: [['Touch each one and say a number: one, two, three…', function () { return Models.row(4, 'duck', '#ffd23f'); }], ['Count each one only once. The last number you say is how many!', function () { return big('1, 2, 3, 4'); }]] },
     g1numbers: { title: 'Numbers 0 to 10', steps: [['Each number has a name and a picture of dots.', function () { return big('3') + Models.dots(3, 80) + '<span class="g1word">three</span>'; }], ['Counting goes up by one: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10.', function () { return ''; }]] },
     g1compare: { title: 'More and fewer', steps: [['Count both groups.', function () { return Models.row(5, 'fish', '#3b8fd9', 0, 220) + Models.row(3, 'fish', '#3b8fd9', 0, 220); }], ['The bigger number has MORE. The smaller number has FEWER.', function () { return big('5 is more than 3'); }]] },
-    g1ordinal: { title: 'First, second, third', steps: [['Start at the front of the line and count: first, second, third, fourth, fifth.', function () { return '<div class="g1row">' + ['first', 'second', 'third'].map(function (w, i) { return '<div class="center">' + Art.icon('duck', 50) + '<b>' + w + '</b></div>'; }).join('') + '</div>'; }]] },
+    g1ordinal: { title: 'First, second, third', steps: [['Start at the front of the line and count: first, second, third, fourth, fifth.', function () { return '<div class="g1row"><div class="center" style="font-size:2rem">🚩<b style="font-size:1rem">front</b></div>' + ['first', 'second', 'third'].map(function (w, i) { return '<div class="center">' + duckL(50) + '<b>' + w + '</b></div>'; }).join('') + '</div>'; }]] },
     g1even: { title: 'Even and odd', steps: [['Make pairs. If every one has a partner, the number is EVEN.', function () { return big('2, 4, 6, 8, 10'); }], ['If one is left over, the number is ODD.', function () { return big('1, 3, 5, 7, 9'); }]] },
     g1ten: { title: 'Ways to make 10', steps: [['A ten-frame has 10 boxes.', function () { return Models.tenFrame(7, 'duck'); }], ['Count the full boxes, then the empty boxes. 7 and 3 make 10.', function () { return big('7 + 3 = 10'); }]] },
     g1add: { title: 'Adding', steps: [['Put the groups together.', function () { return '<div class="g1row">' + Models.row(2, 'duck', '#ffd23f', 0, 140) + '<span class="g1op">+</span>' + Models.row(3, 'duck', '#ffd23f', 0, 140) + '</div>'; }], ['Count them all, or count on from the bigger number: 3… 4, 5.', function () { return big('2 + 3 = 5'); }]] },
@@ -318,47 +319,68 @@ var G1 = (function () {
   function sm(n, k, c) { return Models.row(n, k || 'fish', c || '#3b8fd9', 0, 200); }
   function line(a, b) { var o = '<div class="keyline">'; for (var i = a; i <= b; i++) o += '<span>' + i + '</span>'; return o + '</div>'; }
   var KEYS = {
-    numeral: { say: 'Here are the numbers from zero to ten, with dots to help you.', html: function () { return '<div class="keynums">' + [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (n) { return '<span><b>' + n + '</b>' + Models.dots(n, 34) + '</span>'; }).join('') + '</div>'; } },
+    numeral: { say: 'Here is the number line from zero to ten. The numbers go in order.', html: function () { return Models.numberLine(0, 10, { width: 340 }); } },
     numberWord: { say: 'Each number has a word. Zero, one, two, three, four, five, six, seven, eight, nine, ten.', html: function () { return '<div class="keynums">' + W.slice(0, 11).map(function (w, n) { return '<span><b>' + n + '</b><i>' + w + '</i></span>'; }).join('') + '</div>'; } },
-    dots: { say: 'Count each dot one time. The last number you say is how many.', html: function () { return Models.dots(3, 50) + Models.dots(5, 50) + '<div>3 &nbsp; 5</div>'; } },
+    dots: { say: 'Count each dot one time. Take one step on the number line for each dot. The last number you say is how many.', html: function (pr) { var n = pr && pr.data ? pr.data.n : 0; return Models.numberLine(0, n > 10 ? 20 : 10, { width: n > 10 ? 560 : 340 }); } },
     tally: { say: 'Each line is one. Four lines with a line across them make five.', html: function () { return Models.tally(1).replace(/width="[^"]*" height="112"/, 'width="40" height="50"') + ' = 1 &nbsp; ' + Models.tally(5).replace(/width="[^"]*" height="112"/, 'width="60" height="50"') + ' = 5'; } },
-    countSet: { say: 'Touch each one and say a number. The last number you say tells how many.', html: function () { return sm(3, 'duck', '#ffd23f') + '<div>1, 2, 3 → 3</div>'; } },
-    makeSet: { say: 'Count as you tap. Stop when you reach the number.', html: function () { return sm(3, 'duck', '#ffd23f') + '<div>stop at 3</div>'; } },
-    compareSets: { say: 'More means the bigger group. Fewer means the smaller group.', html: function () { return '<div><b>MORE</b> ' + sm(5) + '</div><div><b>FEWER</b> ' + sm(2) + '</div>'; } },
-    nextNumber: { say: 'After means one more. Before means one less. Use the number line.', html: function () { return line(0, 20) + '<div>← before · after →</div>'; } },
-    missingNumber: { say: 'Numbers go in order on the number line. Say them out loud to find the missing one.', html: function () { return line(0, 20); } },
-    ordinal: { say: 'Start at the front of the line. First, second, third, fourth, fifth.', html: function () { return '<div class="g1row">' + ['1st', '2nd', '3rd', '4th', '5th'].map(function (o) { return '<span class="center">' + Art.icon('duck', 30) + '<b>' + o + '</b></span>'; }).join('') + '</div>'; } },
+    countSet: { say: 'Touch each one and say a number. The last number you say tells how many.', html: function (pr) { var n = pr && pr.data ? pr.data.n : 0; return Models.numberLine(0, n > 10 ? 20 : 10, { width: n > 10 ? 560 : 340 }); } },
+    makeSet: { say: 'Count as you tap. Stop when you reach the number.', html: function (pr) { var k = pr && pr.answer ? +pr.answer : 3; return Models.numberLine(0, Math.max(5, k <= 10 ? 10 : 12), { hops: [0, k], width: 340 }) + '<div>count 1, 2, 3… stop at ' + k + '</div>'; } },
+    compareSets: { say: 'Count both groups. The number farther along the number line is more. The number closer to zero is fewer.', html: function () { return Models.numberLine(0, 10, { width: 340 }) + '<div>fewer ← · → more</div>'; } },
+    nextNumber: { say: 'After means one step forward on the number line. Before means one step back.', html: function (pr) { var hi = pr && pr.data && Math.max(pr.data.n + 1, 10) > 10 ? 20 : 10; return Models.numberLine(hi > 10 ? 10 : 0, hi, { width: 340 }) + '<div>← before · after →</div>'; } },
+    missingNumber: { say: 'Numbers go in order on the number line. Say them out loud to find the missing one.', html: function (pr) { var hi = pr && pr.data && Math.max.apply(null, pr.data.seq) > 10 ? 20 : 10; return Models.numberLine(hi > 10 ? 10 : 0, hi, { width: 340 }); } },
+    ordinal: { say: 'Start at the front of the line, by the flag. First, second, third, fourth, fifth.', html: function () { return '<div class="g1row"><span class="center">🚩<b>front</b></span>' + ['1st', '2nd', '3rd', '4th', '5th'].map(function (o) { return '<span class="center">' + duckL(30) + '<b>' + o + '</b></span>'; }).join('') + '</div>'; } },
     evenOdd: { say: 'Even means every one has a partner. Odd means one is left over with no partner.', html: function () { return '<div><b>EVEN</b> <span class="g1pairs"><span>' + Art.icon('fish', 26) + Art.icon('fish', 26) + '</span><span>' + Art.icon('fish', 26) + Art.icon('fish', 26) + '</span></span></div><div><b>ODD</b> <span class="g1pairs"><span>' + Art.icon('fish', 26) + Art.icon('fish', 26) + '</span><span>' + Art.icon('fish', 26) + '<i class="g1alone" style="width:26px;height:26px"></i></span></span></div>'; } },
     namesForTen: { say: 'A ten-frame has ten boxes. Count the empty boxes to find how many more make ten.', html: function () { return Models.tenFrame(7, 'dot', 140) + '<div>7 + 3 = 10</div>'; } },
     countTens: { say: 'Each bundle is ten. Count bundles by tens, then the loose sticks by ones.', html: function () { return Models.sticks(2, 3).replace(/width="[^"]*" height="132"/, 'width="150" height="80"') + '<div>10, 20 … 21, 22, 23</div>'; } },
     shapeFind: { say: 'A circle is round. A triangle has three sides. A square has four sides the same. A rectangle has two long sides and two short sides.', html: function () { return '<div class="g1row">' + ['circle', 'triangle', 'square', 'rectangle'].map(function (k) { return '<span class="center">' + Models.figure(k, 40) + '<i>' + k + '</i></span>'; }).join('') + '</div>'; } },
-    pattern: { say: 'A pattern repeats again and again. Find the part that repeats, and say it out loud.', html: function () { return '<div class="g1row"><span class="g1dot" style="background:#e5533d;width:26px;height:26px"></span><span class="g1dot" style="background:#3b8fd9;width:26px;height:26px"></span><span class="g1dot" style="background:#e5533d;width:26px;height:26px"></span><span class="g1dot" style="background:#3b8fd9;width:26px;height:26px"></span> …</div>'; } },
-    oddOneOut: { say: 'Three things are alike. Find the one that is different.', html: function () { return Art.icon('fish', 34) + Art.icon('duck', 34) + Art.icon('gull', 34) + ' ≠ ' + Art.icon('apple', 34); } },
-    add10: { say: 'Plus means put the groups together. Count them all.', html: function () { return sm(2, 'duck', '#ffd23f') + ' + ' + sm(1, 'duck', '#ffd23f') + '<div>2 + 1 = 3</div>'; } },
-    sub10: { say: 'Minus means take away. Count only the ones that are left.', html: function () { return Models.row(4, 'apple', '#e5533d', 1, 200) + '<div>4 − 1 = 3</div>'; } },
-    coinName: { say: 'Penny, one cent. Nickel, five cents. Dime, ten cents. Quarter, twenty-five cents.', html: function () { return ['penny', 'nickel', 'dime', 'quarter'].map(function (k) { return '<span class="center">' + Models.coin(k, 34) + '<i>' + k + '</i></span>'; }).join(''); } },
+    pattern: { say: 'A pattern repeats again and again. Find the part that repeats, and say it out loud.', html: function () { return '<div class="g1row">' + Models.figure('circle', 26, '#9aa1ad') + Models.figure('square', 26, '#ffffff') + Models.figure('circle', 26, '#9aa1ad') + Models.figure('square', 26, '#ffffff') + ' …</div><div>circle, square, circle, square</div>'; } },
+    oddOneOut: { say: 'Three things are alike. Find the one that is different. It does not belong.', html: function () { return Models.figure('circle', 30, '#9aa1ad') + Models.figure('circle', 30, '#9aa1ad') + Models.figure('circle', 30, '#9aa1ad') + ' ≠ ' + Models.figure('triangle', 30, '#9aa1ad'); } },
+    add10: { say: 'Plus means put together. Start at the bigger number and count on, one hop at a time.', html: keyAdd },
+    sub10: { say: 'Minus means take away. Start at the first number and hop back, one hop for each one taken away.', html: keySub },
+    coinName: { say: 'Penny, one cent. Nickel, five cents. Dime, ten cents. Quarter, twenty-five cents.', html: function () { return ['penny', 'nickel', 'dime', 'quarter'].map(function (k) { return '<span style="display:inline-flex;flex-direction:column;align-items:center;margin:0 8px;vertical-align:bottom">' + Models.coin(k, 44) + '<i>' + k + '</i><b>' + Models.COINS[k].c + '¢</b></span>'; }).join(''); } },
     clockHour: { say: 'The short hand tells the hour. When the long hand points to twelve, it is o\'clock.', html: function () { return Models.clock(3, 0, 90) + '<div>short hand → 3 · 3:00</div>'; } },
     dayAfter: { say: 'Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday. After means the next day.', html: function () { return '<div class="keyline">' + ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(function (d) { return '<span>' + d + '</span>'; }).join('') + '</div>'; } },
-    longer: { say: 'Line up the ends. The longer one sticks out farther.', html: function () { return Models.lengthBar(6, '#e5533d', 7) + ' longer<br>' + Models.lengthBar(3, '#3b8fd9', 7) + ' shorter'; } },
+    longer: { say: 'Line up the ends on one side. The one that sticks out farther is longer. The other one is shorter.', html: function () { return '<div class="keylong">' + Models.lengthBar(6, '#9aa1ad', 7) + '<b>longer</b></div><div class="keylong">' + Models.lengthBar(3, '#9aa1ad', 7) + '<b>shorter</b></div>'; } },
     equalShares: { say: 'Equal parts are all the same size. Halves are two equal parts. Fourths are four equal parts.', html: function () { return Models.shape({ kind: 'circle', n: 2, shaded: 0, size: 60 }) + Models.shape({ kind: 'circle', n: 4, shaded: 0, size: 60 }) + '<div>halves · fourths</div>'; } },
-    pictograph: { say: 'Count the pictures in each row. Most means the biggest number. Fewest means the smallest number.', html: function () { return '<div>' + Art.icon('fish', 24) + Art.icon('fish', 24) + Art.icon('fish', 24) + ' = 3</div><div>' + Art.icon('duck', 24) + ' = 1</div>'; } }
+    pictograph: { say: 'Count the pictures in each row. The longest row has the most. The shortest row has the fewest.', html: function () { return '<div>' + Art.icon('star', 22, '#9aa1ad') + Art.icon('star', 22, '#9aa1ad') + Art.icon('star', 22, '#9aa1ad') + ' most</div><div>' + Art.icon('star', 22, '#9aa1ad') + ' fewest</div>'; } }
   };
-  KEYS.teens = { say: 'Teen numbers are ten and some more. Eleven is ten and one. Twelve is ten and two. Twenty is two tens.', html: function () { return '<div class="keynums">' + [11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map(function (n) { return '<span><b>' + n + '</b><i>10 + ' + (n - 10) + '</i></span>'; }).join('') + '</div>'; } };
+  KEYS.teens = { say: 'Teen numbers come after ten on the number line. Eleven is ten and one. Twelve is ten and two.', html: function () { return Models.numberLine(10, 20, { width: 340 }); } };
   KEYS.teenWords = { say: 'Eleven, twelve, thirteen, fourteen, fifteen, sixteen, seventeen, eighteen, nineteen, twenty.', html: function () { return '<div class="keynums">' + W.slice(11, 21).map(function (w, i) { return '<span><b>' + (i + 11) + '</b><i>' + w + '</i></span>'; }).join('') + '</div>'; } };
-  KEYS.ordinal10 = { say: 'Start at the front. First, second, third, fourth, fifth, sixth, seventh, eighth, ninth, tenth.', html: function () { return '<div class="keyline">' + ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'].map(function (o) { return '<span>' + o + '</span>'; }).join('') + '</div><div>🚩 front →</div>'; } };
-  KEYS.dozen = { say: 'A dozen means twelve. A carton of eggs holds a dozen.', html: function () { return Models.row(12, 'egg', '#fff6e0', 0, 200) + '<div>a dozen = 12</div>'; } };
-  KEYS.barGraph = { say: 'In a bar graph, the taller the bar, the more there are. Look from the top of the bar across to the number.', html: function () { return barSvg([BARS[0], BARS[1]], [4, 2], 5).replace(/width="[^"]*"/, 'width="150"') + '<div>taller bar = more</div>'; } };
+  KEYS.ordinal10 = { say: 'Start at the front. First, second, third, fourth, fifth, sixth, seventh, eighth, ninth, tenth.', html: function () { return '<div class="keyline">' + ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'].map(function (o) { return '<span>' + o + '</span>'; }).join('') + '</div><div>🚩 front ⬅ start counting here</div>'; } };
+  KEYS.dozen = { say: 'A dozen means twelve. A carton of eggs holds a dozen.', html: function () { return Models.carton(12, 26) + '<div>a full carton = a dozen = 12</div>'; } };
+  KEYS.barGraph = { say: 'In a bar graph, the taller the bar, the more there are. Look from the top of the bar across to the number.', html: function () { return '<svg viewBox="0 0 120 80" width="120" height="80"><path d="M10 70 H110" stroke="#2b2a3a" stroke-width="2"/><rect x="25" y="14" width="26" height="56" fill="#9aa1ad" stroke="#2b2a3a" stroke-width="2"/><rect x="70" y="44" width="26" height="26" fill="#d9d4c6" stroke="#2b2a3a" stroke-width="2"/></svg><div>taller bar = more</div>'; } };
   KEYS.matchUp = { say: 'Match one to one. Give each one a partner. If any are left over, the groups are not the same.', html: function () { return '<div class="g1match">' + [0, 1, 2].map(function (i) { return '<div class="g1mcol">' + Art.icon('boat', 30, '#e5533d') + (i < 2 ? Art.icon('basket', 26) : '<span class="g1ghost" style="width:26px;height:26px"></span>') + '</div>'; }).join('') + '</div>'; } };
   KEYS.plusEquals = { say: 'The plus sign means put together. The equals sign means is the same as.', html: function () { return big('2 + 3 = 5') + '<div>+ plus · = equals</div>'; } };
-  KEYS.addTo6 = { say: 'Plus means put the groups together. Count them all, or start with the bigger group and count on.', html: function () { return ducks(2, DUCKW, 26) + ' + ' + ducks(1, DUCKB, 26) + '<div>2 + 1 = 3</div>'; } };
+  KEYS.addTo6 = { say: 'Plus means put together. Start at the bigger number and count on, one hop at a time.', html: keyAdd };
   KEYS.zeroPrinciple = { say: 'Adding zero means adding nothing. The number stays the same. Four plus zero is four.', html: function () { return ducks(4, DUCKW, 24) + ' + 0<div>4 + 0 = 4</div>'; } };
-  KEYS.addSentence = { say: 'An addition sentence tells the story with numbers. The first group, plus the second group, equals how many in all.', html: function () { return ducks(3, DUCKW, 24) + ' + ' + ducks(2, DUCKB, 24) + '<div>3 + 2 = 5</div>'; } };
-  KEYS.addStory = { say: 'In a story problem, find the two groups. Draw them, then count them all.', html: function () { return Models.row(2, 'fish', '#3b8fd9', 0, 80) + ' + ' + Models.row(3, 'fish', '#3b8fd9', 0, 110) + '<div>2 + 3 = 5</div>'; } };
-  KEYS.addVertical = { say: 'Adding up and down: add the top number and the bottom number. The answer goes under the line.', html: function () { return Models.vertical(2, 3, 5); } };
+  KEYS.addSentence = { say: 'An addition sentence tells the story with numbers. The first group, plus the second group, equals how many in all.', html: function () { return '<div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap">' + Art.icon('duck', 28, DUCKW) + '<span>white ducks</span><b>+</b>' + Art.icon('duck', 28, DUCKB) + '<span>brown ducks</span><b>=</b><span>all the ducks</span></div>'; } };
+  KEYS.addStory = { say: 'In a story problem, find the two groups. Draw them, then count them all.', html: function (pr) { return '<div>first group <b>+</b> second group <b>=</b> how many in all</div>' + keyAdd(pr); } };
+  KEYS.addVertical = { say: 'Adding up and down: add the top number and the bottom number. The answer goes under the line.', html: function (pr) { var d = (pr && pr.data) || {}; return d.a !== undefined ? Models.vertical(d.a, d.b) + '<div>top + bottom; the answer goes under the line</div>' : Models.vertical(2, 3); } };
   KEYS.addNames = { say: 'A number has many names. Five is four plus one, three plus two, and five plus zero.', html: function () { return '<div class="keynums"><span><b>5</b><i>4 + 1</i></span><span><b>5</b><i>3 + 2</i></span><span><b>5</b><i>5 + 0</i></span></div>'; } };
   KEYS.turnAround = { say: 'Turn-around facts: changing the order does not change the answer. Two plus three and three plus two are both five.', html: function () { return Models.domino(2, 3, 34, true) + ' ↻ ' + Models.domino(3, 2, 34, true) + '<div>2 + 3 = 3 + 2</div>'; } };
   KEYS.coinValue = KEYS.coinName; KEYS.countPennies = { say: 'Each penny is one cent. Count the pennies.', html: function () { return Models.coin('penny', 34) + ' = 1¢'; } };
 
-  function make(skill, opts) { opts = opts || {}; return function (level) { return S[skill](opts, level || 2); }; }
+  /* Counting hints use a clean number line (no blocks): what the K–1 curricula use for counting, before/after and counting on. */
+  var NL = function (a, b, o) { return Models.numberLine(a, b, o); };
+  /* keys for adding and taking away use the child's own numbers: where to start and how many hops. They never show the answer. */
+  function keyAdd(pr) { var d = (pr && pr.data) || {}; if (d.a === undefined) return Models.numberLine(0, 6, { mark: 2, width: 300 }) + '<div>start at 2, hop 1</div>';
+    var big = Math.max(d.a, d.b), small = Math.min(d.a, d.b), top = d.a + d.b > 10 ? 20 : 10;
+    return Models.numberLine(0, top, { mark: big, width: top > 10 ? 560 : 360 }) + '<div>start at <b>' + big + '</b>, then hop ' + small + (small === 1 ? ' time' : ' times') + ' →</div>'; }
+  function keySub(pr) { var d = (pr && pr.data) || {}; if (d.a === undefined) return Models.numberLine(0, 6, { mark: 4, width: 300 }) + '<div>start at 4, hop back 1</div>';
+    return Models.numberLine(0, 10, { mark: d.a, width: 360 }) + '<div>start at <b>' + d.a + '</b>, then hop back ' + d.b + (d.b === 1 ? ' time' : ' times') + ' ←</div>'; }
+  function hintLine(pr) {
+    var d = pr.data || {}, top = function (n) { return n > 10 ? 20 : 10; };
+    switch (pr.skill) {
+      case 'countSet': case 'dots': case 'tally': case 'dozen': return NL(0, top(d.n), {});
+      case 'numeral': return NL(d.n > 10 ? 10 : 0, top(d.n), { mark: d.n });
+      case 'nextNumber': var lo = Math.max(0, d.n - 4), hi = Math.min(Math.max(lo + 8, d.n + 4), 20); return NL(lo, hi, { mark: d.n });
+      case 'missingNumber': var mn = Math.min.apply(null, d.seq), mx = Math.max.apply(null, d.seq); return NL(Math.max(0, mn - 1), Math.min(20, mx + 1), {});
+      case 'compareSets': return NL(0, 10, { only: [d.a, d.b] });
+      case 'add10': case 'addTo6': case 'addStory': case 'addVertical': case 'turnAround': var big = Math.max(d.a, d.b); return NL(0, d.a + d.b <= 10 ? 10 : 20, { mark: big, hops: [big, d.a + d.b] });
+      case 'sub10': return NL(0, 10, { mark: d.a, hops: [d.a, d.a - d.b] });
+    }
+    return '';
+  }
+  function make(skill, opts) { opts = opts || {}; return function (level) { var pr = S[skill](opts, level || 2); try { var h = hintLine(pr); if (h) pr.hintPic = h; } catch (e) {} return pr; }; }
   return { make: make, S: S, NAMES: NAMES, W: W, KEYS: KEYS, barSvg: barSvg };
 })();

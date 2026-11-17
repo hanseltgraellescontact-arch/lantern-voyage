@@ -21,7 +21,7 @@ var Video = (function () {
     var tube = [];
     vids.forEach(function (v) { (v.tube || []).forEach(function (t) { tube.push(t); }); });
     host.innerHTML = '<div class="vplayer"><div class="vtop"><span class="vbadge">🎬 Watch &amp; learn</span><b id="vtitle"></b><span class="spacer"></span><div class="vdots" id="vdots"></div></div>' +
-      '<div class="vscreen" id="vscreen"></div><div class="vcap" id="vcap"></div>' +
+      '<div class="vscreen" id="vscreen"></div><div class="vcap" id="vcap"></div><div class="vnextbar" id="vnextbar" style="display:none"></div>' +
       '<div class="vctl"><button class="btn small plain" id="vagain">↻ Watch again</button>' +
       (tube.length ? '<button class="btn small blue" id="vtube">📺 Watch on YouTube</button>' : '') +
       '<span class="spacer"></span><button class="btn big green" id="vdone"' + (seen || opts.free ? '' : ' disabled') + '>' + (opts.doneLabel || 'I\'m ready! →') + '</button></div></div>';
@@ -31,6 +31,7 @@ var Video = (function () {
     function show(html) { scr.innerHTML = '<div class="vpop">' + html + '</div>'; }
 
     function runScene(sc, my) {
+      curScene = { sc: sc };
       if (sc.say && !sc.count && !sc.song && !sc.beat) {
         show(sc.show ? sc.show() : ''); cap.textContent = sc.say;
         return Audio2.speak(sc.say).then(function () { return wait(App.isHarbor() ? 1400 : 500); });
@@ -90,14 +91,27 @@ var Video = (function () {
       }
       return Promise.resolve();
     }
+    /* K5 / 1st grade: one idea at a time. After each part, wait for the child to tap Next (or hear it again). */
+    var curScene = null;
+    function tapNext(my) {
+      return new Promise(function (res) {
+        var bar = U.$('#vnextbar', host);
+        bar.innerHTML = '<button class="btn plain" id="vrep">🔁 Hear it again</button><button class="btn big" id="vnext">Next ▶</button>';
+        bar.style.display = 'flex';
+        U.$('#vnext', host).onclick = function () { Audio2.sfx('tap'); bar.style.display = 'none'; bar.innerHTML = ''; res(); };
+        U.$('#vrep', host).onclick = function () { if (curScene && curScene.sc.say) Audio2.speak(curScene.sc.say); };
+        window.__vnextWaiting = true;
+      }).then(function () { window.__vnextWaiting = false; });
+    }
     function play() {
-      var my = ++token, idx = 0; Audio2.stop(); stopSong();
+      var my = ++token, idx = 0; Audio2.stop(); stopSong(); var nb = U.$('#vnextbar', host); if (nb) { nb.style.display = 'none'; nb.innerHTML = ''; }
       return vids.reduce(function (acc, v) {
         return acc.then(function () {
           if (my !== token) return;
           U.$('#vtitle', host).textContent = v.title;
-          return v.scenes.reduce(function (a2, sc) {
-            return a2.then(function () { if (my !== token) return; dots(idx++); return runScene(sc, my); });
+          return v.scenes.reduce(function (a2, sc, si) {
+            return a2.then(function () { if (my !== token) return; dots(idx++); return runScene(sc, my); })
+              .then(function () { if (my !== token) return; var last = idx >= total; return App.isHarbor() && !last ? tapNext(my) : null; });
           }, Promise.resolve());
         });
       }, Promise.resolve()).then(function () {

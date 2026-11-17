@@ -300,7 +300,16 @@ canvas.maze{background:#0d5c8e;border-radius:18px;box-shadow:var(--shadow);max-w
 .g1num{font-size:2.6rem;font-weight:800;line-height:1.1;letter-spacing:.04em;display:inline-block}
 .prompt .g1num{font-size:2.2rem;vertical-align:middle;margin-left:6px}
 .g1word{font-size:1.7rem;font-weight:800;display:inline-block}
-.g1set{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:4px auto}
+.g1set{display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:center;margin:4px auto}
+.g1five{display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:100%}
+.g1set.line .g1five{flex-wrap:nowrap}
+.g1set.line{justify-content:flex-start;flex-wrap:nowrap;margin:2px 0}
+.g1front{align-self:stretch;width:100%;text-align:left;font-weight:800;font-size:1.3rem;padding-left:4px}
+.choices.ordrow{flex-wrap:nowrap;gap:4px;justify-content:flex-start}
+body.g1 .choices.ordrow .choicebtn,.choices.ordrow .choicebtn{min-width:0;min-height:0;padding:4px;flex:0 1 auto;border-width:3px}
+.choices.ordrow .choicebtn svg{max-width:100%;height:auto}
+.choices.stack{flex-direction:column;align-items:stretch;max-width:680px;margin-left:auto;margin-right:auto;width:100%}
+.choices.stack .choicebtn{display:flex;justify-content:flex-start;align-items:center;text-align:left}
 .g1item{display:inline-flex;position:relative}
 .g1item.crossed::after{content:"";position:absolute;left:4px;right:4px;top:50%;height:6px;background:#e5533d;border-radius:4px;transform:rotate(-35deg)}
 .g1item.crossed svg{opacity:.45}
@@ -369,6 +378,7 @@ body.g1 .speaker .bubble{font-size:1.1rem}
 .vno{position:relative;display:inline-block}
 .vno::after{content:"";position:absolute;top:10px;right:10px;bottom:10px;left:10px;border:6px solid #e5533d;border-radius:50%}
 .visual.tappable .g1item svg{width:64px;height:64px}
+.visual.tappable .g1set{max-width:none!important}
 .choicebtn.reading{border-color:#ffc23c;box-shadow:0 0 0 5px #fff3a0;transform:scale(1.06)}
 /* ===== Lantern Harbor hands-on activities (touch first) ===== */
 .act{display:flex;flex-direction:column;gap:10px;width:100%}
@@ -475,7 +485,11 @@ body.g1 input{-webkit-user-select:text;user-select:text}
 .g1mcol{display:flex;flex-direction:column;align-items:center;gap:6px;border-left:3px dashed #9ccfe8;padding:0 4px}
 .g1mcol:first-child{border-left:0}
 .g1ghost{display:inline-block;width:40px;height:40px;border:3px dashed #e5533d;border-radius:50%}
-.g1carton{display:inline-block;background:#e9dcc3;border:4px solid #2b2a3a;border-radius:16px;padding:8px}
+.g1cartonwrap{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap}
+.g1carton{display:inline-flex;flex-direction:column;gap:4px;background:#e9dcc3;border:4px solid #2b2a3a;border-radius:16px;padding:8px}
+.g1crow{display:flex;gap:4px}
+.g1cup{display:inline-block;border-radius:50%;background:#d8c7a6;box-shadow:inset 0 3px 0 rgba(0,0,0,.15)}
+.g1extra{display:inline-flex;gap:4px}
 
 /* Weather Rock (metric) and Fish Market (addition) */
 .mthing { display: inline-block; line-height: 1.1; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
@@ -506,3 +520,11 @@ body.g1 input{-webkit-user-select:text;user-select:text}
 .pvchart td { font-size: 2rem; }
 .pvchart .hi { background: #ffd23f; }
 .vprob.big4 { font-size: 2.3rem; letter-spacing: .06em; }
+.vnextbar { display: flex; gap: 12px; justify-content: center; align-items: center; margin: 8px 0; }
+.vnextbar #vnext { animation: vpulse 1.8s ease-in-out infinite; }
+@keyframes vpulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+.hintpic { margin-top: 8px; display: flex; justify-content: center; }
+.keylong { display: flex; align-items: center; gap: 6px; }
+.conceptkey .numline { max-width: 100%; }
+.sessclock { position: fixed; top: 4px; right: 6px; z-index: 60; background: rgba(43,42,58,.82); color: #fff; font-weight: 800; font-size: .85rem; padding: 3px 10px; border-radius: 999px; pointer-events: none; }
+.sessclock.inbar { position: static; align-self: center; white-space: nowrap; margin-left: 2px; }

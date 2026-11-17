@@ -90,7 +90,7 @@ var Audio2 = (function () {
   function playClip(src, token) {
     return new Promise(function (res) {
       var a = el('voice'); a.onended = null; a.onerror = null; a.loop = false; a.src = src; curAudio = a;
-      a.playbackRate = Math.max(0.7, Math.min(1.3, (settings().rate || 0.95) / 0.95 * (window.App && App.isHarbor && App.isHarbor() ? 0.92 : 1)));
+      a.preservesPitch = true; a.webkitPreservesPitch = true; a.playbackRate = Math.max(0.7, Math.min(1.3, (settings().rate || 0.95) / 0.95 * (window.App && App.isHarbor && App.isHarbor() ? 0.82 : 1))); // 1st grade / K5: slower, same pitch
       var done = false, t1 = null; function fin() { if (!done) { done = true; clearTimeout(t1); a.onplaying = null; res(); } }
       a.onended = fin; a.onerror = fin; a.onstalled = fin;
       // iPad safety: if the clip has not started within 2.5 s, move on; once it plays, allow its own length plus a little

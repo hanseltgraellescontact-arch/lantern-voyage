@@ -122,8 +122,10 @@ CONTENT.courses.voyage = CONTENT.courses.voyage || { id: 'voyage', name: 'The La
     'H0-t2': [A.animalsFood],
     'H0-t3': [A.pattern([['red', 'blue']]), A.pattern([['red', 'red', 'blue'], ['yellow', 'green', 'green']])],
     'H0-t4': [A.catchN(10, 'fish'), A.frame(4, 8)],
-    'H0-t5': [A.catchN(8, 'wood'), A.match(6)],
+    'H0-t5': [A.catchN(8, 'wood'), A.catchN(6, 'fish')],
+    'H0-t5b': [A.match(6)],
     'H0-t6': [A.catchN(15, 'mail', 10), A.numOrder(10, 15)],
+    'H0-t6b': [A.numOrder(1, 8), A.numOrder(11, 16)],
     'H0-t7': [A.catchN(20, 'apples'), A.catchN(17, 'sails')],
     'H0-t8': [A.ropes],
     'H0-t9': [A.graph()],
@@ -156,17 +158,29 @@ CONTENT.courses.voyage = CONTENT.courses.voyage || { id: 'voyage', name: 'The La
       intro: 'A good helper counts the supplies before the boats go out. Let\'s see how well you can count!', mastered: ['Show what you know about counting to 20'] },
     teach('H0-t4', 'Numbers to 10', ['num10', 'dots10', 'num10', 'dots10', 'num10'], [
       S('Every number has a name and a picture. This is three. Three dots, the number 3, and the word three.', function () { return B(3) + Models.dots(3) + '<span class="g1word">three</span>'; }),
-      S('We count up by one: zero, one, two, three, four, five, six, seven, eight, nine, ten.', function () { return B('0 1 2 3 4 5 6 7 8 9 10'); }),
+      S('Here is a number line. We count up by one: zero, one, two, three, four, five, six, seven, eight, nine, ten.', function () { return Models.numberLine(0, 10); }),
       S('Ten dots fill a whole ten-frame.', function () { return Models.tenFrame(10, 'dot'); })
     ], ['num10', 'dots10', 'num10'], ['num10', 'dots10'], ['shapes'], ['Know the numbers 0 to 10'], 'God made us able to count. Counting helps us take care of what He gives us.'),
-    teach('H0-t5', 'Counting and Comparing', ['count10', 'more', 'count10', 'more', 'count10'], [
-      S('To count, touch each one and say one number. The last number you say tells how many.', function () { return icons(5, 'duck', '#ffd23f'); }),
-      S('Which group has more? Count both groups. Five is more than three, so the top group has more.', function () { return icons(5, 'fish', '#3b8fd9') + icons(3, 'fish', '#3b8fd9'); })
-    ], ['count10', 'more', 'count10'], ['count10', 'more'], ['num10'], ['Count up to 10 things', 'Tell which group has more or fewer'], 'Counting carefully is a way to be faithful with small things.'),
-    teach('H0-t6', 'Numbers to 20', ['num20', 'next20', 'num20', 'next20', 'num20'], [
-      S('After ten, we keep counting: eleven, twelve, thirteen, fourteen, fifteen, sixteen, seventeen, eighteen, nineteen, twenty!', function () { return B('11 12 13 14 15 16 17 18 19 20'); }),
-      S('The number after a number is one more. The number before is one less. After 14 comes 15. Before 14 comes 13.', function () { return B('13 ← 14 → 15'); })
-    ], ['num20', 'next20', 'num20'], ['num20', 'next20'], ['count10'], ['Count to 20 and tell what comes before and after'], 'God counts every one of His children. Not one is forgotten.'),
+    teach('H0-t5', 'Counting to 10', ['count10', 'count10', 'count10', 'count10', 'count10'], [
+      S('To count, touch each one and say one number.', function () { return icons(5, 'duck', '#ffd23f'); }),
+      S('One, two, three, four, five. Each time we count, we take one step on the number line.', function () { return Models.numberLine(0, 10, { hops: [0, 5] }); }),
+      S('The last number you say tells how many. Five ducks!', function () { return icons(5, 'duck', '#ffd23f') + B(5); })
+    ], ['count10', 'count10', 'count10'], ['count10'], ['num10'], ['Count up to 10 things'], 'Counting carefully is a way to be faithful with small things.'),
+    teach('H0-t5b', 'More and Fewer', ['more', 'more', 'more', 'more', 'more'], [
+      S('Which group has more? First, count each group.', function () { return '<div>' + icons(5, 'fish', '#3b8fd9') + '</div><div>' + icons(3, 'fish', '#3b8fd9') + '</div>'; }),
+      S('The top group has five. The bottom group has three. Five is farther along the number line, so five is more.', function () { return Models.numberLine(0, 10, { only: [3, 5], mark: 5 }); }),
+      S('Three is less, so the bottom group has fewer.', function () { return '<div>' + icons(5, 'fish', '#3b8fd9') + ' <b>more</b></div><div>' + icons(3, 'fish', '#3b8fd9') + ' <b>fewer</b></div>'; })
+    ], ['more', 'more', 'more'], ['more'], ['count10'], ['Tell which group has more or fewer'], 'God gives us more than we need, so we can share with those who have less.'),
+    teach('H0-t6', 'Numbers 11 to 20', ['num20', 'num20', 'num20', 'num20', 'num20'], [
+      S('After ten, we keep counting.', function () { return Models.numberLine(0, 10, { mark: 10 }); }),
+      S('Eleven, twelve, thirteen, fourteen, fifteen, sixteen, seventeen, eighteen, nineteen, twenty!', function () { return Models.numberLine(10, 20); }),
+      S('Numbers go in order on the number line. If one is missing, say the numbers out loud to find it.', function () { return Models.numberLine(10, 15, { blank: 13 }); })
+    ], ['num20', 'num20', 'num20'], ['num20'], ['count10'], ['Count from 11 to 20 in order'], 'God counts every one of His children. Not one is forgotten.'),
+    teach('H0-t6b', 'Before and After', ['next20', 'next20', 'next20', 'next20', 'next20'], [
+      S('The number after a number is one more. It is the next step on the number line. After 14 comes 15.', function () { return Models.numberLine(10, 20, { mark: 14, hops: [14, 15] }); }),
+      S('The number before a number is one less. It is one step back. Before 14 comes 13.', function () { return Models.numberLine(10, 20, { mark: 14, hops: [14, 13] }); }),
+      S('Put your finger on the number. Step forward for after. Step back for before.', function () { return Models.numberLine(0, 10, { mark: 6 }); })
+    ], ['next20', 'next20', 'next20'], ['next20'], ['num20'], ['Tell what comes before and after'], 'Step by step, God leads us. His Word is a light for each step.'),
 
     { id: 'H0-m3', video: ['count20', 'measure', 'graph'], title: 'Load the Cargo', kind: 'readiness', covers: ['H0-t7', 'H0-t8', 'H0-t9'], icon: 'crate',
       intro: 'Time to load the cargo! Let\'s see how well you count big groups, measure ropes, and read a picture graph.', mastered: ['Show what you know about counting to 20, measuring, and graphs'] },
@@ -222,8 +236,6 @@ CONTENT.courses.voyage = CONTENT.courses.voyage || { id: 'voyage', name: 'The La
   var MORE0 = {
     'H0-t2': S('Your turn at home: put your toys away by kind. Cars together, blocks together, books together!', function () { return Art.icon('crate', 80) + Art.icon('crate', 80, '#3b8fd9'); }),
     'H0-t3': S('Clap a pattern with Grandpa Eli: clap, stomp, clap, stomp. What comes next? Clap!', function () { return B('👏 🦶 👏 🦶 ?'); }),
-    'H0-t5': S('Which group has fewer? Three is fewer than five. The smaller number has fewer.', function () { return icons(3, 'apple', '#e5533d') + icons(5, 'apple', '#36b37e'); }),
-    'H0-t6': S('Let\'s count from ten to twenty together: ten, eleven, twelve, thirteen, fourteen, fifteen, sixteen, seventeen, eighteen, nineteen, twenty!', function () { return Models.tenFrame(10, 'dot') + Models.tenFrame(10, 'dot'); }),
     'H0-t7': S('A trick for big groups: move each one over after you count it. Then you never count one twice!', function () { return icons(6, 'crate', '#c98a3a'); }),
     'H0-t8': S('Find two things at home, like a spoon and a pencil. Line up the ends. Which one is longer?', function () { return '<div>' + Models.lengthBar(6, '#36b37e', 8) + '<br>' + Models.lengthBar(3, '#ff9f1c', 8) + '</div>'; }),
     'H0-t9': S('The row with the fewest pictures has the fewest. Here, there are fewer ducks than fish.', function () { return '<div class="g1graph"><div class="g1grow"><b>Fish</b>' + Art.icon('fish', 36) + Art.icon('fish', 36) + Art.icon('fish', 36) + '</div><div class="g1grow"><b>Ducks</b>' + Art.icon('duck', 36) + '</div></div>'; }),
@@ -234,9 +246,13 @@ CONTENT.courses.voyage = CONTENT.courses.voyage || { id: 'voyage', name: 'The La
     'H0-t15': S('Today, tomorrow, yesterday! If today is Monday, tomorrow is Tuesday, and yesterday was Sunday.', function () { return B('Sunday ← Monday → Tuesday'); })
   };
   Q0.forEach(function (q) { if (MORE0[q.id] && q.slides && q.slides.length < 3) q.slides.push(MORE0[q.id]); });
-  Q0.forEach(function (q, i) { q.num = i + 1; if (PLAY0[q.id]) q.play = PLAY0[q.id]; });
-  Q0.filter(function (q) { return q.id === 'H0-t7'; })[0].video = ['count20'];
-  Q0.filter(function (q) { return q.id === 'H0-f'; })[0].video = ['count10', 'add'];
+  /* One concept at a time (for 4- to 6-year-olds): every Helper's Yard lesson teaches a single idea, with its own short video.
+     The old three-topic readiness checks are gone; each lesson's practice score feeds the parent's readiness report. */
+  var VID0 = { 'H0-t1': ['shapes'], 'H0-t2': ['sort'], 'H0-t3': ['pattern'], 'H0-t4': ['numbers'], 'H0-t5': ['count10'], 'H0-t5b': ['compare'], 'H0-t6': ['teens'], 'H0-t6b': ['order'],
+    'H0-t7': ['count20'], 'H0-t8': ['measure'], 'H0-t9': ['graph'], 'H0-t10': ['add'], 'H0-t11': ['sub'], 'H0-t12': ['equal'], 'H0-t13': ['coins'], 'H0-t14': ['clock'], 'H0-t15': ['days'] };
+  Q0 = Q0.filter(function (q) { return q.kind !== 'readiness'; });
+  Q0.forEach(function (q, i) { q.num = i + 1; if (PLAY0[q.id]) q.play = PLAY0[q.id]; if (VID0[q.id]) q.video = VID0[q.id]; });
+  Q0.filter(function (q) { return q.id === 'H0-f'; })[0].video = ['count10'];
 
   CONTENT.islands.H0 = {
     id: 'H0', course: 'harbor', name: "Helper's Yard", noPretest: true,
@@ -434,7 +450,7 @@ CONTENT.courses.voyage = CONTENT.courses.voyage || { id: 'voyage', name: 'The La
           { say: 'Here is ten. The ten-frame is full.', visual: function () { return Models.tenFrame(10, 'dot', 220) + B(10); } },
           { say: 'Ten and one more is eleven. We write eleven with two ones.', visual: function () { return teenCard(11); } },
           { say: 'Ten and two more is twelve. We write it with a one and a two.', visual: function () { return teenCard(12); } },
-          { say: 'Twelve has a special name. A dozen! A carton of eggs holds a dozen.', visual: function () { return '<div class="g1carton">' + Models.row(12, 'egg', '#fff6e0', 0, 360) + '</div>'; } },
+          { say: 'Twelve has a special name. A dozen! A carton of eggs holds a dozen.', visual: function () { return Models.carton(12); } },
           { say: 'Sets help people work. I pack my fish in sets of twelve, so I know how many I have to sell.', visual: function () { return Models.row(12, 'fish', '#3b8fd9', 0, 360); } }
         ],
         play: [A.trace([11, 12]), AH2.catchTo(12, 12, 'eggs'), AH2.teenFrame(11, 12)],

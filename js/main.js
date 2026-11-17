@@ -24,6 +24,7 @@ var App = (function () {
     if (Audio2.setTrack) Audio2.setTrack(name === 'maze' || name === 'game' || name === 'arcade' ? 'arcade' : name === 'title' || name === 'parent' ? 'title' :
       harbor ? (name === 'quest' ? 'hquest' : 'htown') : name === 'quest' ? 'quest' : 'sea');
     var p = Store.active();
+    clock();
     var old = document.querySelector('.preview-banner');
     if (old) old.remove();
     if (p && p.preview && name !== 'title' && name !== 'parent') {
@@ -57,7 +58,25 @@ var App = (function () {
       if (document.visibilityState !== 'visible' || Date.now() - lastInput > 120000) return;
       Store.addTime(p, 5);
       if (++tick % 6 === 0) Store.save();
+      clock();
     }, 5000);
+  }
+  /* Today's practice time, in the top corner for the parent to see. It counts active play only and starts over each day. */
+  function clock() {
+    var el = document.getElementById('sessclock'), p = Store.active();
+    var show = p && !p.preview && current && current !== 'title' && current !== 'parent' && current !== 'builder';
+    if (!show) { if (el) el.style.display = 'none'; return; }
+    // sit inside the screen's top bar when it has one, so the clock never covers a button
+    var bar = document.querySelector('#app .topbar') || document.querySelector('.topbar');
+    var home = bar || document.body;
+    if (!el || el.parentNode !== home) {
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+      el = document.createElement('div'); el.id = 'sessclock'; el.className = 'sessclock noprint' + (bar ? ' inbar' : ''); el.title = 'Practice time today (active play only)';
+      home.appendChild(el);
+    }
+    var secs = (p.time && p.time[U.today()]) || 0, m = Math.floor(secs / 60), h = Math.floor(m / 60);
+    el.textContent = '⏱ Today ' + (h ? h + ' h ' + (m % 60) + ' min' : m + ' min');
+    el.style.display = '';
   }
 
   function start() {

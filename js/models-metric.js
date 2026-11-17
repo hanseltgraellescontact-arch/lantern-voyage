@@ -117,4 +117,32 @@
     return '<div class="vprob big4"><span></span><span>' + f(a) + '</span><span class="vop">' + (op || '+') + '</span><span>' + f(b) + '</span><span class="vline"></span><span class="vline">' + (ans === undefined ? '?' : f(ans)) + '</span></div>';
   }
   Models.pvBlocks = pvBlocks; Models.pvChart = pvChart; Models.vertical4 = vertical4;
+
+  /* A clean number line (the way K–2 curricula show counting): one tick per number, the numbers underneath.
+     o.mark: circle one number · o.blank: show "?" in place of a number · o.hops: [from, to] hop arrows above (count on / back)
+     o.only: draw just these numbers (the rest stay ticks) · o.width: pixels */
+  function numberLine(lo, hi, o) {
+    o = o || {}; var n = hi - lo, W = o.width || Math.min(640, 70 + n * 52), pad = 26, u = (W - 2 * pad) / Math.max(1, n), y = o.hops ? 70 : 34, H = y + 46;
+    var X = function (v) { return pad + (v - lo) * u; }, fs = n > 14 ? 15 : 19;
+    var s = '<svg class="numline" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" style="max-width:100%;height:auto" aria-hidden="true">' +
+      '<path d="M' + (pad - 16) + ' ' + y + ' H' + (W - pad + 16) + '" stroke="' + O + '" stroke-width="3"/>' +
+      '<path d="M' + (pad - 18) + ' ' + y + ' l9 -6 v12z M' + (W - pad + 18) + ' ' + y + ' l-9 -6 v12z" fill="' + O + '"/>';
+    if (o.hops) {
+      var a = o.hops[0], b = o.hops[1], dir = b > a ? 1 : -1;
+      for (var h = a; h !== b; h += dir) {
+        var x1 = X(h), x2 = X(h + dir), mx = (x1 + x2) / 2;
+        s += '<path d="M' + x1 + ' ' + (y - 6) + ' Q' + mx + ' ' + (y - 46) + ' ' + x2 + ' ' + (y - 8) + '" stroke="#e5793d" stroke-width="3" fill="none"/>' +
+          '<path d="M' + x2 + ' ' + (y - 6) + ' l' + (-dir * 9) + ' -8 l' + (dir * 1) + ' 10z" fill="#e5793d"/>';
+      }
+    }
+    for (var v = lo; v <= hi; v++) {
+      var x = X(v), show = !o.only || o.only.indexOf(v) >= 0;
+      s += '<path d="M' + x + ' ' + (y - 9) + ' V' + (y + 9) + '" stroke="' + O + '" stroke-width="2.5"/>';
+      if (o.mark === v) s += '<circle cx="' + x + '" cy="' + (y + 28) + '" r="15" fill="#ffd23f" stroke="' + O + '" stroke-width="2"/>';
+      if (o.blank === v) s += '<rect x="' + (x - 13) + '" y="' + (y + 14) + '" width="26" height="28" rx="5" fill="#fff" stroke="#e5533d" stroke-width="2.5"/><text x="' + x + '" y="' + (y + 35) + '" text-anchor="middle" font-size="' + fs + '" font-weight="800" fill="#e5533d">?</text>';
+      else if (show) s += '<text x="' + x + '" y="' + (y + 35) + '" text-anchor="middle" font-size="' + fs + '" font-weight="800" fill="' + O + '">' + v + '</text>';
+    }
+    return s + '</svg>';
+  }
+  Models.numberLine = numberLine;
 })();

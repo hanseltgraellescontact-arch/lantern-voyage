@@ -48,7 +48,7 @@ var Voice = (function () {
   function plan(text, who, lang) {
     var out = [];
     sentences(norm(text)).forEach(function (s, i) {
-      if (i) out.push({ pause: window.App && App.isHarbor && App.isHarbor() ? 750 : 280 }); // 1st grade: longer pauses between sentences
+      if (i) out.push({ pause: window.App && App.isHarbor && App.isHarbor() ? 1100 : 280 }); // 1st grade: longer pauses between sentences
       var whole = hash(who + '|' + (lang || 'en') + '|' + s);
       if (window.VOICE_CLIPS && VOICE_CLIPS[whole]) { out.push({ src: 'audio/voice/' + whole + '.mp3' }); return; }
       // fallback: build a number sentence from phrase + number pieces

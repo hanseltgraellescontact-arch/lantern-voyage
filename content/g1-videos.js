@@ -165,7 +165,7 @@
     { say: 'Every teen number is one full ten and some more.', show: function () { return teen(15); } }
   ] });
   V('dozen', { title: 'A dozen', tube: [], scenes: [
-    { say: 'Fisherman Pete buys eggs in a carton. A full carton is called a dozen.', show: function () { return '<div class="g1carton">' + Models.row(12, 'egg', '#fff6e0', 0, 420) + '</div>'; } },
+    { say: 'Fisherman Pete buys eggs in a carton. A full carton is called a dozen.', show: function () { return Models.carton(12); } },
     { count: 12, kind: 'egg', say: 'Let\'s count the eggs in a dozen.', end: 'Twelve! A dozen means twelve.' },
     { say: 'Jesus chose twelve disciples. That is a dozen helpers!', show: function () { return B('a dozen = 12'); } }
   ] });

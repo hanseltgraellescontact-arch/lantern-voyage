@@ -112,11 +112,12 @@ var Models = (function () {
     var s = '<svg viewBox="0 0 200 200" width="' + size + '" height="' + size + '"><circle cx="100" cy="100" r="92" fill="#fff" stroke="#22335e" stroke-width="7"/>';
     for (var i = 1; i <= 12; i++) {
       var a = Math.PI / 6 * i - Math.PI / 2;
-      s += '<text x="' + (100 + Math.cos(a) * 72).toFixed(1) + '" y="' + (107 + Math.sin(a) * 72).toFixed(1) + '" text-anchor="middle" font-size="20" font-weight="800" fill="#22335e">' + i + '</text>';
+      s += '<line x1="' + (100 + Math.cos(a) * 84).toFixed(1) + '" y1="' + (100 + Math.sin(a) * 84).toFixed(1) + '" x2="' + (100 + Math.cos(a) * 91).toFixed(1) + '" y2="' + (100 + Math.sin(a) * 91).toFixed(1) + '" stroke="#22335e" stroke-width="3"/>';
+      s += '<text x="' + (100 + Math.cos(a) * 70).toFixed(1) + '" y="' + (107 + Math.sin(a) * 70).toFixed(1) + '" text-anchor="middle" font-size="20" font-weight="800" fill="#22335e">' + i + '</text>';
     }
     var ma = Math.PI / 30 * m - Math.PI / 2, ha = Math.PI / 6 * ((h % 12) + m / 60) - Math.PI / 2;
-    s += '<line x1="100" y1="100" x2="' + (100 + Math.cos(ha) * 46).toFixed(1) + '" y2="' + (100 + Math.sin(ha) * 46).toFixed(1) + '" stroke="#e5533d" stroke-width="8" stroke-linecap="round"/>';
-    s += '<line x1="100" y1="100" x2="' + (100 + Math.cos(ma) * 70).toFixed(1) + '" y2="' + (100 + Math.sin(ma) * 70).toFixed(1) + '" stroke="#22335e" stroke-width="5" stroke-linecap="round"/>';
+    s += '<line x1="100" y1="100" x2="' + (100 + Math.cos(ha) * 38).toFixed(1) + '" y2="' + (100 + Math.sin(ha) * 38).toFixed(1) + '" stroke="#e5533d" stroke-width="8" stroke-linecap="round"/>';
+    s += '<line x1="100" y1="100" x2="' + (100 + Math.cos(ma) * 54).toFixed(1) + '" y2="' + (100 + Math.sin(ma) * 54).toFixed(1) + '" stroke="#22335e" stroke-width="5" stroke-linecap="round"/>';
     return s + '<circle cx="100" cy="100" r="6" fill="#22335e"/></svg>';
   }
   /* clock face shaded from 12 for a fraction of an hour */
@@ -202,13 +203,26 @@ var Models = (function () {
     return s + '</svg>';
   }
   /* a row/group of icons; crossed: how many at the end are crossed out (for take-away) */
-  function row(n, kind, color, crossed, max) {
-    var out = '<div class="g1set" style="max-width:' + (max || 440) + 'px">';
+  /* items come in groups of five (like a ten-frame) so a child can see 5 and count on; line: keep one row, lined up at the left */
+  function row(n, kind, color, crossed, max, line) {
+    max = Math.max(max || 440, Math.min(n, 5) * 58 + 8); // always room for a full group of five
+    var out = '<div class="g1set' + (line ? ' line' : '') + '" style="max-width:' + max + 'px">';
     for (var i = 0; i < n; i++) {
       var x = crossed && i >= n - crossed;
-      out += '<span class="g1item' + (x ? ' crossed' : '') + '">' + Art.icon(kind, 50, color) + '</span>';
+      if (i % 5 === 0) out += (i ? '</span>' : '') + '<span class="g1five">';
+      out += '<span class="g1item' + (x ? ' crossed' : '') + '">' + Art.icon(kind, line ? 44 : 50, color) + '</span>';
     }
-    return out + '</div>';
+    return out + (n ? '</span>' : '') + '</div>';
+  }
+  /* an egg carton: 2 rows of 6 cups. Fewer than 12 leaves empty cups; more than 12 puts the extra eggs outside. */
+  function carton(n, size) {
+    size = size || 44;
+    var cup = function (i) { return i < n ? '<span class="g1item">' + Art.icon('egg', size, '#fff6e0') + '</span>' : '<span class="g1cup" style="width:' + size + 'px;height:' + size + 'px"></span>'; };
+    var out = '<span class="g1carton"><span class="g1crow">';
+    for (var i = 0; i < 12; i++) { if (i === 6) out += '</span><span class="g1crow">'; out += cup(i); }
+    out += '</span></span>';
+    if (n > 12) { out += '<span class="g1extra">'; for (var j = 12; j < n; j++) out += '<span class="g1item">' + Art.icon('egg', size, '#fff6e0') + '</span>'; out += '</span>'; }
+    return '<div class="g1cartonwrap">' + out + '</div>';
   }
   /* coins */
   var COINS = { penny: { c: 1, col: '#c9773b', r: 22, label: '1¢' }, nickel: { c: 5, col: '#b8c0c8', r: 26, label: '5¢' }, dime: { c: 10, col: '#d6dbe0', r: 20, label: '10¢' }, quarter: { c: 25, col: '#c6ccd2', r: 29, label: '25¢' } };
@@ -230,8 +244,42 @@ var Models = (function () {
     return s + '</svg>';
   }
   /* plain 2D / 3D shape */
+  /* 3-D solids drawn the way geometry books show them: each face its own shade, hidden back edges dashed. */
+  function mixC(h, t, k) { var n = parseInt(h.slice(1), 16), m = parseInt(t.slice(1), 16), f = function (sh) { return Math.round(((n >> sh) & 255) * (1 - k) + ((m >> sh) & 255) * k); }; return 'rgb(' + f(16) + ',' + f(8) + ',' + f(0) + ')'; }
+  function solid(kind, col) {
+    var lt = mixC(col, '#ffffff', 0.45), dk = mixC(col, '#000000', 0.22), E = ' stroke="' + OLc + '" stroke-width="3.5" stroke-linejoin="round"', D = ' stroke="' + OLc + '" stroke-width="2.2" stroke-dasharray="5 4" fill="none" opacity=".75"';
+    function poly(pts, fill) { return '<path d="M' + pts.join(' L') + 'z" fill="' + fill + '"' + E + '/>'; }
+    function dash(a, b) { return '<path d="M' + a + ' L' + b + '"' + D + '/>'; }
+    switch (kind) {
+      case 'cube': // front square, top and right faces; hidden corner at back-bottom-left
+        return poly(['14 38', '62 38', '62 86', '14 86'], col) + poly(['14 38', '36 18', '84 18', '62 38'], lt) + poly(['62 38', '84 18', '84 66', '62 86'], dk) +
+          dash('36 66', '14 86') + dash('36 66', '84 66') + dash('36 66', '36 18');
+      case 'prism': // a box: wider than tall
+        return poly(['6 44', '68 44', '68 84', '6 84'], col) + poly(['6 44', '28 26', '92 26', '68 44'], lt) + poly(['68 44', '92 26', '92 66', '68 84'], dk) +
+          dash('28 66', '6 84') + dash('28 66', '92 66') + dash('28 66', '28 26');
+      case 'pyramid': // SQUARE pyramid: a square base (back edges dashed) and four triangle faces meeting at the top
+        return poly(['50 8', '10 80', '60 90'], col) + poly(['50 8', '60 90', '92 68'], dk) +
+          '<path d="M10 80 L60 90 L92 68" fill="none"' + E + '/>' +
+          dash('42 60', '10 80') + dash('42 60', '92 68') + dash('42 60', '50 8');
+      case 'tripyramid': // TRIANGULAR pyramid: a triangle base, three triangle faces
+        return poly(['50 10', '10 82', '62 90'], col) + poly(['50 10', '62 90', '90 70'], dk) + '<path d="M10 82 L62 90 L90 70" fill="none"' + E + '/>' +
+          dash('10 82', '90 70');
+      case 'cylinder':
+        return '<path d="M16 24 V78 A34 11 0 0 0 84 78 V24" fill="' + col + '"' + E + '/>' + '<path d="M16 78 A34 11 0 0 1 84 78"' + D + '/>' +
+          '<ellipse cx="50" cy="24" rx="34" ry="11" fill="' + lt + '"' + E + '/>';
+      case 'cone':
+        return '<path d="M50 8 L84 80 A34 11 0 0 1 16 80 Z" fill="' + col + '"' + E + '/>' + '<path d="M16 80 A34 11 0 0 1 84 80"' + D + '/>';
+      case 'sphere':
+        return '<circle cx="50" cy="50" r="40" fill="' + col + '"' + E + '/>' + '<path d="M10 50 A40 12 0 0 0 90 50" fill="none" stroke="' + OLc + '" stroke-width="2"/>' +
+          '<path d="M10 50 A40 12 0 0 1 90 50"' + D + '/>' + '<ellipse cx="34" cy="32" rx="10" ry="7" fill="#fff" opacity=".55"/>';
+    }
+    return null;
+  }
   function figure(kind, size, col) {
     size = size || 110; col = col || '#7fc8a9'; var st = ' fill="' + col + '" stroke="' + OLc + '" stroke-width="4" stroke-linejoin="round"';
+    var c6 = /^#[0-9a-f]{3}$/i.test(col) ? '#' + col.slice(1).split('').map(function (x) { return x + x; }).join('') : col;
+    var sd = /^#[0-9a-f]{6}$/i.test(c6) ? solid(kind, c6) : null;
+    if (sd) return '<svg viewBox="0 0 100 100" width="' + size + '" height="' + size + '">' + sd + '</svg>';
     var d = { circle: '<circle cx="50" cy="50" r="40"' + st + '/>', square: '<rect x="12" y="12" width="76" height="76"' + st + '/>', triangle: '<path d="M50 10 L92 88 H8z"' + st + '/>',
       rectangle: '<rect x="4" y="26" width="92" height="50"' + st + '/>', hexagon: '<path d="M28 10 H72 L94 50 L72 90 H28 L6 50z"' + st + '/>',
       cube: '<path d="M20 34 L44 20 H86 V62 L62 76 H20z"' + st + '/><path d="M20 34 H62 V76 M62 34 L86 20" stroke="' + OLc + '" stroke-width="4" fill="none"/>',
@@ -247,6 +295,6 @@ var Models = (function () {
   /* simple measuring pictures */
   function lengthBar(len, col, max) { return '<svg viewBox="0 0 ' + (max * 30 + 20) + ' 40" width="' + (max * 30 + 20) + '" height="40"><rect x="6" y="8" width="' + len * 30 + '" height="24" rx="10" fill="' + col + '" stroke="' + OLc + '" stroke-width="3"/></svg>'; }
 
-  return { dots: dots, tenFrame: tenFrame, tally: tally, row: row, coin: coin, COINS: COINS, sticks: sticks, figure: figure, lengthBar: lengthBar, shape: shape, bar: bar, barStack: barStack, set: set, circleGraph: circleGraph, clock: clock, clockFraction: clockFraction,
+  return { carton: carton, dots: dots, tenFrame: tenFrame, tally: tally, row: row, coin: coin, COINS: COINS, sticks: sticks, figure: figure, lengthBar: lengthBar, shape: shape, bar: bar, barStack: barStack, set: set, circleGraph: circleGraph, clock: clock, clockFraction: clockFraction,
     ruler: ruler, jar: jar, plates: plates, FILL: FILL };
 })();

@@ -1,5 +1,20 @@
-THE LANTERN VOYAGE + LANTERN HARBOR - Demo 9
-============================================
+THE LANTERN VOYAGE + LANTERN HARBOR - Demo 10
+=============================================
+
+WHAT'S NEW IN DEMO 10
+- Practice clock: "Today X min" sits in the top corner for each child. It counts
+  active play only and starts over each day.
+- Saves: an old copy of the game left open in another tab can no longer
+  overwrite newer progress (this is what reset the parrot).
+- Helper's Yard (K5 review) teaches one idea per lesson (18 lessons), with a
+  number line on every counting slide. Voices speak slower and pause longer,
+  and the videos wait for "Next" between scenes.
+- Counting hints and keys use a number line. Adding and taking-away keys use
+  the child's own numbers (start at ..., hop ...) without giving the answer.
+- Pictures: groups come in fives like a ten-frame; "more/fewer" groups and
+  ropes are stacked and lined up at the left; the dozen is a 2 x 6 carton; the
+  ordinal ducks face the flag at the front; clearer clock hands; solid figures
+  are shaded with hidden edges dashed (square vs triangular pyramid).
 
 WHAT THIS IS
 Two courses in one game. Each child profile picks one (Parent area > Children >
